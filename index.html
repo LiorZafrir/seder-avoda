@@ -202,7 +202,7 @@ header span{font-size:0.85rem;opacity:0.8}
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYXC4k1xENa712Au81uCDwt9BG2X1zlWB4bacr0W4EM4DsJqm4loNfbQYYfwb4CsZR/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxthvE6VJ569Do3zCm-IhbUA8gHNxcSBLlkppu3EebpZ0vRCdpVoTlkzG7HzLjtQzc7WQ/exec';
 
 const DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 let employees = ['חיים','ליאור','סרגיי','ענבל'];
@@ -218,9 +218,11 @@ function fmtD(d){return `${p2(d.getDate())}/${p2(d.getMonth()+1)}`}
 async function loadFromSheet() {
   setSyncStatus('loading');
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=read&t=${Date.now()}`);
+    const res = await fetch(`${APPS_SCRIPT_URL}?t=${Date.now()}`, {redirect:'follow'});
     const text = await res.text();
-    const data = JSON.parse(text || '{}');
+    const idx = text.indexOf('{');
+    const clean = idx >= 0 ? text.slice(idx) : '{}';
+    const data = JSON.parse(clean);
     employees = data.employees || employees;
     requests  = data.requests  || [];
     populateEmpSelects();
@@ -240,7 +242,9 @@ async function saveToSheet() {
     const payload = JSON.stringify({employees, requests});
     await fetch(APPS_SCRIPT_URL, {
       method:'POST',
-      body: new URLSearchParams({action:'write', data: payload})
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: payload,
+      redirect:'follow'
     });
     setSyncStatus('ok');
   } catch(e) {
