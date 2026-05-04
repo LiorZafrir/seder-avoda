@@ -166,6 +166,15 @@ header h1{font-size:1.3rem;font-weight:700}
 .btn-cancel{background:#f1f5f9;color:#475569}
 .btn-danger{background:#ef4444;color:white}
 .btn-primary{background:#2563eb;color:white}
+.loading-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;transition:opacity .4s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.loading-logo{font-size:3rem;margin-bottom:12px;animation:logoPulse 1.2s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.loading-text{color:white;font-size:1rem;font-weight:700;opacity:0.9}
+.loading-dots span{animation:dot 1.2s infinite;display:inline-block}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);color:white;padding:12px 24px;border-radius:12px;font-weight:600;font-size:0.9rem;box-shadow:0 8px 24px #0002;transition:transform .3s;z-index:9999;text-align:center;max-width:90vw}
 .toast.show{transform:translateX(-50%) translateY(0)}
 @media(max-width:700px){.days-grid{grid-template-columns:repeat(4,1fr)}}
@@ -206,7 +215,12 @@ header h1{font-size:1.3rem;font-weight:700}
 <body>
 
 <!-- ══ LOGIN ══ -->
-<div class="login-screen" id="loginScreen">
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">📋</div>
+  <div class="loading-text">טוען נתונים<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>
+</div>
+
+<div class="login-screen" id="loginScreen" style="opacity:0;pointer-events:none;">
   <div class="login-card">
     <div class="logo">📋</div>
     <h2>כוננות ותגבורים</h2>
@@ -327,10 +341,10 @@ header h1{font-size:1.3rem;font-weight:700}
 <div id="tab-current" class="container" style="display:none;">
   <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
     <button class="refresh-btn" onclick="loadFromSheet()">🔄 רענן</button>
+    <select id="currentWeekSelect" onchange="renderCurrentWeek()" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 12px;font-size:0.86rem;font-family:inherit;background:white;color:#1a2233;font-weight:600;"></select>
     <div class="export-group">
       <button class="export-btn excel" onclick="exportCurrentWeekExcel()">📊 Excel</button>
     </div>
-    <div id="currentWeekLabel" style="font-size:0.88rem;color:#64748b;font-weight:600;margin-right:auto;"></div>
   </div>
   <div id="summaryBarCurrent" class="summary-bar"></div>
   <div id="currentWeekArea"></div>
@@ -858,7 +872,7 @@ function switchTab(t){
     const el=document.getElementById('tab-'+id);
     if(el)el.style.display=id===t?'':'none';
   });
-  if(t==='current')renderCurrentWeek();
+  if(t==='current'){buildCurrentWeekOptions();renderCurrentWeek();}
   if(t==='archive'){buildFilterYears();buildFilterEmps();renderArchive()}
   if(t==='history')renderHistory();
   if(t==='pin')renderSelfPinStatus();
@@ -867,13 +881,8 @@ function switchTab(t){
 
 // ── CURRENT WEEK ──────────────────────────────────────────
 function renderCurrentWeek(){
-  const cws=getCurrentWeekStart();
-  const nws=getNextWeekStart();
-  // show current week if has data, otherwise next week
-  let displayWs=cws;
-  const hasCurrentData=requests.some(r=>r.weekStart===cws);
-  const hasNextData=requests.some(r=>r.weekStart===nws);
-  if(!hasCurrentData&&hasNextData)displayWs=nws;
+  // Always show next week - requests are always for the upcoming week
+  const displayWs=getNextWeekStart();
 
   const s=new Date(displayWs),e=new Date(displayWs);e.setDate(e.getDate()+6);
   document.getElementById('currentWeekLabel').textContent=`📅 שבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}`;
