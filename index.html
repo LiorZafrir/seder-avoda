@@ -880,13 +880,25 @@ function switchTab(t){
 }
 
 // ── CURRENT WEEK ──────────────────────────────────────────
+function buildCurrentWeekOptions(){
+  const sel=document.getElementById('currentWeekSelect');
+  if(!sel)return;
+  const nws=getNextWeekStart();
+  const allWeeks=[...new Set([nws,...requests.map(r=>r.weekStart)])].sort().reverse();
+  const cur=sel.value;
+  sel.innerHTML=allWeeks.map(w=>{
+    const [y,m,d]=w.split('-').map(Number);
+    const s=new Date(y,m-1,d),e=new Date(y,m-1,d+6);
+    const isNext=w===nws;
+    return `<option value="${w}"${(!cur&&isNext)||cur===w?' selected':''}>${isNext?'⭐ ':''}${fmtD(s)}-${fmtD(e)} / ${e.getFullYear()}</option>`;
+  }).join('');
+  if(!sel.value) sel.value=nws;
+}
+
 function renderCurrentWeek(){
-  // Always show next week - requests are always for the upcoming week
-  const displayWs=getNextWeekStart();
-
-  const s=new Date(displayWs),e=new Date(displayWs);e.setDate(e.getDate()+6);
-  document.getElementById('currentWeekLabel').textContent=`📅 שבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}`;
-
+  buildCurrentWeekOptions();
+  const sel=document.getElementById('currentWeekSelect');
+  const displayWs=sel?.value||getNextWeekStart();
   const weekReqs=requests.filter(r=>r.weekStart===displayWs);
   renderSummaryTo('summaryBarCurrent',weekReqs);
   if(!weekReqs.length){
