@@ -689,7 +689,9 @@ function doLogin(){
   }
   const isManager=managers.some(m=>m.name===name);
   currentUser={name,isManager};
-  document.getElementById('loginScreen').classList.add('hidden');
+  const ls=document.getElementById('loginScreen');
+  ls.style.opacity='0';ls.style.pointerEvents='none';
+  setTimeout(()=>{ls.style.display='none';},300);
   document.getElementById('userBadge').textContent=`👤 ${name}${isManager?' ⚙️':''}`;
   if(isManager)document.getElementById('tab-btn-manager').style.display='';
   else document.getElementById('tab-btn-manager').style.display='none';
@@ -712,7 +714,8 @@ function showLoginErr(msg){
 
 function logout(){
   currentUser=null;
-  document.getElementById('loginScreen').classList.remove('hidden');
+  const lsl=document.getElementById('loginScreen');
+  lsl.style.display='flex';lsl.style.opacity='1';lsl.style.pointerEvents='';
   document.getElementById('loginPin').value='';
   document.getElementById('pinSection').style.display='none';
   document.getElementById('loginErr').style.display='none';
@@ -1679,7 +1682,11 @@ function revealLogin(){
   if(managers.length===0){
     showSetupScreen();
   } else {
-    if(login){login.style.opacity='1';login.style.pointerEvents='';}
+    if(login){
+      login.style.display='flex';
+      login.style.opacity='1';
+      login.style.pointerEvents='';
+    }
   }
 }
 
