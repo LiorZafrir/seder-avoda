@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -200,7 +201,7 @@ header h1{font-size:1.3rem;font-weight:700}
 .toggle{position:relative;width:44px;height:24px;flex-shrink:0}
 .toggle input{opacity:0;width:0;height:0}
 .toggle-slider{position:absolute;inset:0;background:#e2e8f0;border-radius:24px;cursor:pointer;transition:.3s}
-.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s}
+.toggle-slider:before{content:’’;position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.3s}
 .toggle input:checked+.toggle-slider{background:#25D366}
 .toggle input:checked+.toggle-slider:before{transform:translateX(20px)}
 .schedule-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
@@ -211,10 +212,12 @@ header h1{font-size:1.3rem;font-weight:700}
 .sub-done{background:#dcfce7;color:#15803d}
 .sub-pending{background:#fee2e2;color:#b91c1c}
 </style>
+
 </head>
 <body>
 
 <!-- ══ LOGIN ══ -->
+
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-logo">📋</div>
   <div class="loading-text">טוען נתונים<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>
@@ -237,8 +240,8 @@ header h1{font-size:1.3rem;font-weight:700}
   </div>
 </div>
 
-
 <!-- ══ SETUP SCREEN ══ -->
+
 <div class="login-screen" id="setupScreen" style="display:none;opacity:1">
   <div class="login-card" style="max-width:420px;">
     <div class="logo">⚙️</div>
@@ -283,6 +286,7 @@ header h1{font-size:1.3rem;font-weight:700}
 </div>
 
 <!-- ══ FORM TAB ══ -->
+
 <div id="tab-form" class="container">
   <div class="card" id="formCard">
     <h2 id="formTitle">📝 הגשת בקשה לשבוע</h2>
@@ -317,6 +321,7 @@ header h1{font-size:1.3rem;font-weight:700}
 </div>
 
 <!-- ══ PIN TAB ══ -->
+
 <div id="tab-pin" class="container" style="display:none;">
   <div class="card">
     <h2>🔐 קוד PIN אישי</h2>
@@ -338,6 +343,7 @@ header h1{font-size:1.3rem;font-weight:700}
 </div>
 
 <!-- ══ CURRENT WEEK TAB ══ -->
+
 <div id="tab-current" class="container" style="display:none;">
   <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
     <button class="refresh-btn" onclick="loadFromSheet()">🔄 רענן</button>
@@ -351,6 +357,7 @@ header h1{font-size:1.3rem;font-weight:700}
 </div>
 
 <!-- ══ ARCHIVE TAB ══ -->
+
 <div id="tab-archive" class="container" style="display:none;">
   <div class="filters">
     <label>שנה:</label>
@@ -368,6 +375,7 @@ header h1{font-size:1.3rem;font-weight:700}
 </div>
 
 <!-- ══ HISTORY TAB ══ -->
+
 <div id="tab-history" class="container" style="display:none;">
   <div class="card">
     <h2>📜 ההיסטוריה שלי</h2>
@@ -389,15 +397,18 @@ header h1{font-size:1.3rem;font-weight:700}
 </div>
 
 <!-- ══ MANAGER TAB ══ -->
+
 <div id="tab-manager" class="container" style="display:none;">
 
   <!-- Pending changes -->
+
   <div class="pending-card" id="pendingSection" style="display:none;">
     <h3>⏳ בקשות שינוי ממתינות לאישור</h3>
     <div id="pendingList"></div>
   </div>
 
   <!-- Employee management -->
+
   <div class="card">
     <h2>👥 ניהול עובדים וקודים</h2>
     <div class="emp-manager">
@@ -415,6 +426,7 @@ header h1{font-size:1.3rem;font-weight:700}
   </div>
 
   <!-- Managers -->
+
   <div class="card">
     <h2>⚙️ מנהלים</h2>
     <div class="emp-manager">
@@ -431,80 +443,85 @@ header h1{font-size:1.3rem;font-weight:700}
   </div>
 
   <!-- WhatsApp Settings -->
+
   <div class="card">
     <h2>📲 הגדרות WhatsApp</h2>
-    
-    <!-- Submission status -->
-    <div class="wa-section" style="background:#eff6ff;border-color:#bfdbfe;margin-bottom:16px;">
-      <h3 style="color:#1d4ed8;">📊 סטטוס הגשות השבוע</h3>
-      <div id="submissionStatusGrid" class="sub-status-grid"></div>
-      <button class="wa-btn" style="background:#2563eb;" onclick="sendReminderToMissing()">
-        📲 שלח תזכורת למי שלא הגיש
-      </button>
-    </div>
 
-    <!-- Notify manager toggle -->
-    <div class="wa-section">
-      <h3>🔔 התראה למנהל על הגשת בקשה</h3>
-      <div class="toggle-row">
-        <div>
-          <label>קבל התראה כשעובד מגיש בקשה</label>
-          <span>פותח WhatsApp עם פרטי הבקשה</span>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="notifyManagerToggle" onchange="saveWaSettings()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div style="margin-top:10px;">
-        <label style="font-size:0.78rem;font-weight:700;color:#64748b;display:block;margin-bottom:4px;">מספר טלפון המנהל (לקבלת התראות)</label>
-        <input type="tel" id="managerPhone" placeholder="0501234567" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.9rem;font-family:inherit;width:100%;max-width:200px;" onblur="saveWaSettings()">
-      </div>
-    </div>
+```
+<!-- Submission status -->
+<div class="wa-section" style="background:#eff6ff;border-color:#bfdbfe;margin-bottom:16px;">
+  <h3 style="color:#1d4ed8;">📊 סטטוס הגשות השבוע</h3>
+  <div id="submissionStatusGrid" class="sub-status-grid"></div>
+  <button class="wa-btn" style="background:#2563eb;" onclick="sendReminderToMissing()">
+    📲 שלח תזכורת למי שלא הגיש
+  </button>
+</div>
 
-    <!-- Auto reminder -->
-    <div class="wa-section">
-      <h3>⏰ תזכורת אוטומטית לעובדים</h3>
-      <div class="toggle-row">
-        <div>
-          <label>שלח תזכורת אוטומטית</label>
-          <span>פותח WhatsApp עם הודעה מוכנה</span>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="autoReminderToggle" onchange="saveWaSettings();toggleReminderSchedule()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div id="reminderSchedule" style="display:none;">
-        <div class="schedule-row">
-          <label style="font-size:0.82rem;font-weight:600;color:#64748b;">יום:</label>
-          <select id="reminderDay">
-            <option value="0">ראשון</option>
-            <option value="1">שני</option>
-            <option value="2">שלישי</option>
-            <option value="3">רביעי</option>
-            <option value="4">חמישי</option>
-            <option value="5">שישי</option>
-          </select>
-          <label style="font-size:0.82rem;font-weight:600;color:#64748b;">שעה:</label>
-          <input type="time" id="reminderTime" value="09:00" oninput="saveWaSettings()">
-        </div>
-        <div style="margin-top:8px;font-size:0.78rem;color:#94a3b8;">💡 כשמגיע הזמן – תקבל התראה בדפדפן ויפתח WhatsApp אוטומטית</div>
-      </div>
-      <div style="margin-top:12px;">
-        <button class="wa-btn" onclick="sendManualReminder()">📲 שלח תזכורת עכשיו</button>
-      </div>
+<!-- Notify manager toggle -->
+<div class="wa-section">
+  <h3>🔔 התראה למנהל על הגשת בקשה</h3>
+  <div class="toggle-row">
+    <div>
+      <label>קבל התראה כשעובד מגיש בקשה</label>
+      <span>פותח WhatsApp עם פרטי הבקשה</span>
     </div>
+    <label class="toggle">
+      <input type="checkbox" id="notifyManagerToggle" onchange="saveWaSettings()">
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+  <div style="margin-top:10px;">
+    <label style="font-size:0.78rem;font-weight:700;color:#64748b;display:block;margin-bottom:4px;">מספר טלפון המנהל (לקבלת התראות)</label>
+    <input type="tel" id="managerPhone" placeholder="0501234567" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:0.9rem;font-family:inherit;width:100%;max-width:200px;" onblur="saveWaSettings()">
+  </div>
+</div>
 
-    <!-- Export as image -->
-    <div class="wa-section" style="background:#fdf4ff;border-color:#e9d5ff;">
-      <h3 style="color:#7c3aed;">📸 ייצוא טבלה לוואטצאפ</h3>
-      <p style="font-size:0.83rem;color:#64748b;margin-bottom:12px;">צלם את טבלת הסידור השבועי ושתף בקבוצה</p>
-      <button class="wa-btn" style="background:#7c3aed;" onclick="exportTableAsImage()">📸 צלם וייצא תמונה</button>
+<!-- Auto reminder -->
+<div class="wa-section">
+  <h3>⏰ תזכורת אוטומטית לעובדים</h3>
+  <div class="toggle-row">
+    <div>
+      <label>שלח תזכורת אוטומטית</label>
+      <span>פותח WhatsApp עם הודעה מוכנה</span>
     </div>
+    <label class="toggle">
+      <input type="checkbox" id="autoReminderToggle" onchange="saveWaSettings();toggleReminderSchedule()">
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+  <div id="reminderSchedule" style="display:none;">
+    <div class="schedule-row">
+      <label style="font-size:0.82rem;font-weight:600;color:#64748b;">יום:</label>
+      <select id="reminderDay">
+        <option value="0">ראשון</option>
+        <option value="1">שני</option>
+        <option value="2">שלישי</option>
+        <option value="3">רביעי</option>
+        <option value="4">חמישי</option>
+        <option value="5">שישי</option>
+      </select>
+      <label style="font-size:0.82rem;font-weight:600;color:#64748b;">שעה:</label>
+      <input type="time" id="reminderTime" value="09:00" oninput="saveWaSettings()">
+    </div>
+    <div style="margin-top:8px;font-size:0.78rem;color:#94a3b8;">💡 כשמגיע הזמן – תקבל התראה בדפדפן ויפתח WhatsApp אוטומטית</div>
+  </div>
+  <div style="margin-top:12px;">
+    <button class="wa-btn" onclick="sendManualReminder()">📲 שלח תזכורת עכשיו</button>
+  </div>
+</div>
+
+<!-- Export as image -->
+<div class="wa-section" style="background:#fdf4ff;border-color:#e9d5ff;">
+  <h3 style="color:#7c3aed;">📸 ייצוא טבלה לוואטצאפ</h3>
+  <p style="font-size:0.83rem;color:#64748b;margin-bottom:12px;">צלם את טבלת הסידור השבועי ושתף בקבוצה</p>
+  <button class="wa-btn" style="background:#7c3aed;" onclick="exportTableAsImage()">📸 צלם וייצא תמונה</button>
+</div>
+```
+
   </div>
 
   <!-- Unlock request -->
+
   <div class="card">
     <h2>🔓 ביטול נעילת בקשה</h2>
     <p style="font-size:0.88rem;color:#64748b;margin-bottom:16px;">בחר עובד – הבקשה האחרונה שלו תיפתח לעריכה.</p>
@@ -519,6 +536,7 @@ header h1{font-size:1.3rem;font-weight:700}
 </div>
 
 <!-- MODAL -->
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="modalTitle"></h3>
@@ -1654,20 +1672,31 @@ function showSetupErr(msg){
   el.textContent=msg;el.style.display='block';
 }
 
-window.onload=async()=>{
-  await loadFromSheet();
-  // if no employees exist yet, add defaults
+function revealLogin(){
+  const overlay=document.getElementById('loadingOverlay');
+  const login=document.getElementById('loginScreen');
+  if(overlay){overlay.classList.add('hidden');setTimeout(()=>overlay.style.display='none',400);}
   if(employees.length===0){
     employees=[
       {name:'חיים',pin:''},{name:'ליאור',pin:''},{name:'סרגיי',pin:''},{name:'ענבל',pin:''}
     ];
   }
   populateLoginSelect();
-  // if no managers, show setup screen
   if(managers.length===0){
     showSetupScreen();
+  } else {
+    if(login){login.style.opacity='1';login.style.pointerEvents='';}
   }
+}
+
+window.onload=async()=>{
+  // Fallback: show login after 8s regardless
+  const fallback=setTimeout(()=>revealLogin(), 8000);
+  try{ await loadFromSheet(); }catch(e){}
+  clearTimeout(fallback);
+  revealLogin();
 };
 </script>
+
 </body>
 </html>
