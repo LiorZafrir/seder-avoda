@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>בקשות כוננות</title>
+<title>בקשות</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -223,7 +223,7 @@ header h1{font-size:1.3rem;font-weight:700}
 <div class="login-screen" id="loginScreen" style="opacity:0;pointer-events:none;">
   <div class="login-card">
     <div class="logo">📋</div>
-    <h2>בקשות כוננות</h2>
+    <h2>בקשות</h2>
     <p></p>
     <select class="login-select" id="loginName">
       <option value="">-- בחר שם --</option>
@@ -773,7 +773,7 @@ function buildGrid(){
       <div class="day-name">${DAYS[i]}</div>
       <div class="day-date">${fmtD(day)}</div>
       <div class="shift-section">
-        <div class="shift-label sl-k">כוננות</div>
+        <div class="shift-label sl-k">משמרת</div>
         <div class="btn-group">
           <button class="sb" onclick="setK(${i},1,this)">כונן</button>
           <button class="sb" onclick="setK(${i},2,this)">רק כונן 2</button>
@@ -832,7 +832,7 @@ async function submitRequest(){
   const missing=[];
   for(let i=0;i<7;i++){if(fd[i].konenut===null)missing.push(DAYS[i])}
   if(missing.length>0){
-    showToast('❗ חסרה בחירת כוננות ל: '+missing.join(', '),true);
+    showToast('❗ חסרה בחירה ל: '+missing.join(', '),true);
     document.querySelectorAll('.day-card').forEach((c,i)=>{
       if(fd[i].konenut===null){c.style.borderColor='#ef4444';c.style.boxShadow='0 0 0 2px #fee2e2'}
       else{c.style.borderColor='';c.style.boxShadow=''}
@@ -857,7 +857,7 @@ async function submitRequest(){
   // notify manager if enabled
   if(waSettings.notifyManager && waSettings.managerPhone){
     const s=new Date(ws),e=new Date(ws);e.setDate(e.getDate()+6);
-    const msg=`✅ ${currentUser.name} הגיש/ה בקשת כוננות לשבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}`;
+    const msg=`✅ ${currentUser.name} הגיש/ה בקשה לשבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}`;
     const phone=waSettings.managerPhone.replace(/[^0-9]/g,'').replace(/^0/,'972');
     const waUrl=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     // Open WhatsApp automatically
@@ -1152,30 +1152,34 @@ function renderSummaryTo(elId,fil){
 // ── EXCEL EXPORT ──────────────────────────────────────────
 function kLabel(k){return k===1?'כונן':k===2?'רק כונן 2':k==='no'?'לא כונן':''}
 
-function buildXlsxForWeek(ws){
+function buildXlsxForWeek(weekStart){
   const wb=XLSX.utils.book_new();
-  const [yr,mo,dy]=ws.split('-').map(Number);
-  const s=new Date(yr,mo-1,dy),e=new Date(yr,mo-1,dy+6);
-  // Days right to left (Shabbat first = col after name, Sunday last)
-  const daysRTL=[6,5,4,3,2,1,0]; // שבת to ראשון
-  const dates=daysRTL.map(i=>{const d=new Date(yr,mo-1,dy+i);return d});
-  const sheetName=`${fmtD(s)}-${fmtD(e)}`.replace(/\//g,'.');
-  // Header row: שם, סוג, שבת, שישי, חמישי, רביעי, שלישי, שני, ראשון, הערות
-  const aoa=[[`בקשות כוננות – שבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}`],
-    ['שם','סוג',...daysRTL.map(i=>`${DAYS[i]} ${fmtD(dates[daysRTL.indexOf(i)])}`),'הערות']];
-  const weekReqs=requests.filter(r=>r.weekStart===ws);
+  const [yr,mo,dy]=weekStart.split('-').map(Number);
+  const sun=new Date(yr,mo-1,dy);
+  const sat=new Date(yr,mo-1,dy+6);
+  const sheetName=`${fmtD(sun)}-${fmtD(sat)}`.replace(/[/]/g,'.');
+  // RTL: columns go ראשון(right) → שבת(left), so data order is Sun=col0..Sat=col6
+  // But we want right-to-left display: שבת first visually
+  // With RTL:true, column 0 appears on the RIGHT
+  // So order: col0=שם, col1=סוג, col2=ראשון...col8=שבת, col9=הערות
+  const dayDates=Array.from({length:7},(_,i)=>{const d=new Date(yr,mo-1,dy+i);return d});
+  const title=`בקשות – שבוע ${fmtD(sun)}–${fmtD(sat)}/${sat.getFullYear()}`;
+  const headers=['שם','סוג',...DAYS.map((d,i)=>`${d} ${fmtD(dayDates[i])}`),'הערות'];
+  const aoa=[
+    [title,...Array(headers.length-1).fill('')],
+    headers
+  ];
+  const weekReqs=requests.filter(r=>r.weekStart===weekStart);
   employees.forEach(emp=>{
     const req=weekReqs.find(r=>r.name===emp.name);
-    aoa.push([emp.name,'כוננות',...daysRTL.map(i=>kLabel(req?.days[i]?.konenut)),req?.notes||'']);
-    aoa.push(['','תגבור',...daysRTL.map(i=>req?.days[i]?.tigbur?'אפשרי':''),'']);
+    aoa.push([emp.name,'משמרת',...Array.from({length:7},(_,i)=>kLabel(req?.days[i]?.konenut)),req?.notes||'']);
+    aoa.push(['','תגבור',...Array.from({length:7},(_,i)=>req?.days[i]?.tigbur?'אפשרי':''),'']);
   });
-  const ws2=XLSX.utils.aoa_to_sheet(aoa);
-  // RTL direction
-  if(!ws2['!views'])ws2['!views']=[];
-  ws2['!views']=[{RTL:true}];
-  ws2['!cols']=[{wch:14},{wch:8},...Array(7).fill({wch:14}),{wch:22}];
-  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:9}}];
-  XLSX.utils.book_append_sheet(wb,ws2,sheetName);
+  const sheet=XLSX.utils.aoa_to_sheet(aoa);
+  sheet['!views']=[{rightToLeft:true}];
+  sheet['!cols']=[{wch:14},{wch:8},...Array(7).fill({wch:14}),{wch:24}];
+  sheet['!merges']=[{s:{r:0,c:0},e:{r:0,c:9}}];
+  XLSX.utils.book_append_sheet(wb,sheet,sheetName);
   return wb;
 }
 
@@ -1202,12 +1206,12 @@ function exportArchiveExcel(){
     const sheetName=`${fmtD(s)}-${fmtD(e)}`.replace(/\//g,'.');
     const dRTL=[6,5,4,3,2,1,0];
     const datesRTL=dRTL.map(i=>{const d=new Date(ws);d.setDate(d.getDate()+i);return d});
-    const aoa=[[`בקשות כוננות – שבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}`],
+    const aoa=[[`בקשות – שבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}`],
       ['שם','סוג',...dRTL.map((di,j)=>`${DAYS[di]} ${fmtD(datesRTL[j])}`),'הערות']];
     const weekReqs=requests.filter(r=>r.weekStart===ws);
     employees.forEach(emp=>{
       const req=weekReqs.find(r=>r.name===emp.name);
-      aoa.push([emp.name,'כוננות',...dRTL.map(i=>kLabel(req?.days[i]?.konenut)),req?.notes||'']);
+      aoa.push([emp.name,'סוג',...dRTL.map(i=>kLabel(req?.days[i]?.konenut)),req?.notes||'']);
       aoa.push(['','תגבור',...dRTL.map(i=>req?.days[i]?.tigbur?'אפשרי':''),'']);
     });
     const ws2=XLSX.utils.aoa_to_sheet(aoa);
@@ -1225,7 +1229,7 @@ function exportCSV(){
   const weeks=getArchiveWeeks();
   if(!weeks.length){showToast('אין נתונים',true);return}
   const fil=requests.filter(r=>weeks.includes(r.weekStart));
-  const hdrs=['שם','שבוע',...DAYS.map(d=>`${d} - כוננות`),...DAYS.map(d=>`${d} - תגבור`),'הערות'];
+  const hdrs=['שם','שבוע',...DAYS.map(d=>`${d} - משמרת`),...DAYS.map(d=>`${d} - תגבור`),'הערות'];
   const rows=fil.map(r=>[r.name,r.weekStart,...r.days.map(d=>kLabel(d.konenut)),...r.days.map(d=>d.tigbur?'אפשרי':''),r.notes]);
   const csv='\uFEFF'+[hdrs,...rows].map(r=>r.map(c=>`"${c||''}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='archive.csv';a.click();
@@ -1343,7 +1347,7 @@ function sendManualReminder(){
   const s=new Date(nws),e=new Date(nws);e.setDate(e.getDate()+6);
   const notSubmitted=employees.filter(emp=>!requests.some(r=>r.name===emp.name&&r.weekStart===nws));
   const names=notSubmitted.map(e=>e.name).join(', ')||'כולם הגישו ✅';
-  const msg=`📋 תזכורת: הגישו בקשת כוננות לשבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}\n\nטרם הגישו: ${names}\n\nלינק: ${window.location.href}`;
+  const msg=`📋 תזכורת: הגישו בקשה לשבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}\n\nטרם הגישו: ${names}\n\nלינק: ${window.location.href}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
 }
 
