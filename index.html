@@ -815,14 +815,48 @@ function checkSubmittedStatus(){
   const banner=document.getElementById('submittedBanner');
   const formContent=document.getElementById('formContent');
   if(existingReq&&isLocked){
+    // Locked - show banner
     banner.style.display='block';
     formContent.style.display='none';
     const s=new Date(ws),e=new Date(ws);e.setDate(e.getDate()+6);
     document.getElementById('submittedText').textContent=`שבוע ${fmtD(s)}–${fmtD(e)}/${e.getFullYear()}`;
-  }else{
+  } else {
+    // Unlocked - show form
     banner.style.display='none';
     formContent.style.display='';
+    // If there's an existing (unlocked) request, pre-fill the form with it
+    if(existingReq && !isLocked){
+      loadRequestIntoForm(existingReq);
+    }
   }
+}
+
+function loadRequestIntoForm(req){
+  // Fill the grid with existing request data
+  req.days.forEach((d,i)=>{
+    fd[i]={konenut:d.konenut,tigbur:d.tigbur};
+    // Update konenut buttons
+    const card=document.querySelectorAll('.day-card')[i];
+    if(!card)return;
+    const btns=card.querySelectorAll('.btn-group')[0]?.querySelectorAll('.sb');
+    if(btns){
+      btns.forEach(b=>b.className='sb');
+      if(d.konenut===1)btns[0].classList.add('s1');
+      else if(d.konenut===2)btns[1].classList.add('s2');
+      else if(d.konenut==='no')btns[2].classList.add('sno');
+    }
+    // Update tigbur button
+    const tBtn=card.querySelector(`#tg${i}`);
+    if(tBtn){
+      tBtn.className='sb'+(d.tigbur?' st':'');
+      tBtn.textContent=d.tigbur?'✓ אפשרי':'אפשרי';
+    }
+  });
+  // Fill notes
+  const notesEl=document.getElementById('notes');
+  if(notesEl&&req.notes) notesEl.value=req.notes;
+  // Show a subtle info banner
+  showToast('📝 הבקשה הקודמת נטענה – ניתן לערוך ולהגיש מחדש');
 }
 
 async function submitRequest(){
